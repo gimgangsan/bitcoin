@@ -1,0 +1,3 @@
+C:\Users\NEW\OneDrive\바탕 화면\깃, 깃허브 공부한것들\blockChainDevelopment\blockChain\blockChain\Debug\blockChain.vcxproj.AssemblyReference.cache
+C:\Users\NEW\OneDrive\바탕 화면\깃, 깃허브 공부한것들\blockChainDevelopment\blockChain\blockChain\Debug\blockChain.Form1.resources
+C:\Users\NEW\OneDrive\바탕 화면\깃, 깃허브 공부한것들\blockChainDevelopment\blockChain\blockChain\Debug\blockChain.vcxproj.GenerateResource.cache
