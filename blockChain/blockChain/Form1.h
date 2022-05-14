@@ -1,4 +1,9 @@
 #pragma once
+#include <vector>
+#include <iomanip>
+#include <functional>
+#include <iostream>
+#include <sstream>
 
 namespace CppCLRWinformsProjekt {
 
@@ -8,6 +13,7 @@ namespace CppCLRWinformsProjekt {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace std;
 
 	/// <summary>
 	/// Zusammenfassung f? Form1
@@ -74,9 +80,33 @@ namespace CppCLRWinformsProjekt {
 			this->ResumeLayout(false);
 
 		}
+		int createHash(string input) {
+			std::hash<string> str_hash;
+			int output = str_hash(input);
+
+			return output;
+		}
+
+		string int_to_string(int input) {
+			stringstream stringStraemer;
+			string output;
+			stringStraemer << input;
+			stringStraemer >> output;
+
+			return output;
+		}
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		MessageBox::Show("lol");
+
+		//this code is for testing, better delete this later
+		int arbitraryHash = createHash("random input");
+		string at = int_to_string(arbitraryHash);
+
+		vector<int> arbitraryVector = { 1,2,3,4,5 };
+		for (int i = 0; i < arbitraryVector.size(); i++)
+			cout << arbitraryVector[i] << " ";
+		////////////////////////////////////////////////////
 	}
 	};
 }
