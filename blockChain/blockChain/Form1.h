@@ -95,6 +95,12 @@ namespace CppCLRWinformsProjekt {
 
 			return output;
 		}
+
+		
+		
+		
+		
+		
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		MessageBox::Show("lol");
@@ -106,7 +112,40 @@ namespace CppCLRWinformsProjekt {
 		vector<int> arbitraryVector = { 1,2,3,4,5 };
 		for (int i = 0; i < arbitraryVector.size(); i++)
 			cout << arbitraryVector[i] << " ";
+
+		Block* block = new Block("lol", 123);
 		////////////////////////////////////////////////////
 	}
+	};
+
+	//¼Û°ÇÈñ°¡ ¸¸µë
+	class Block {
+
+	public :
+		string data;
+		int hash;
+		int createOwnHash() {
+			string datahash = int_to_string(hash) + data;
+			int localHash = makeHash(datahash);
+			return localHash;
+		}
+		string int_to_string(int input) {
+			stringstream stringStraemer;
+			string output;
+			stringStraemer << input;
+			stringStraemer >> output;
+
+			return output;
+		}
+		int makeHash(string input) {
+			std::hash<string> str_hash;
+			int output = str_hash(input);
+
+			return output;
+		}
+		Block(string data, int previouesHash) {
+			this->data = data;
+			this->hash = createOwnHash();
+		}
 	};
 }
