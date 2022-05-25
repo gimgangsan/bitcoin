@@ -1,5 +1,1 @@
-﻿  CppCLR_WinformsProjekt.cpp
-C:\Users\user\Desktop\블록체인\blockChain\blockChain\Form1.h(113,21): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-  .NETFramework,Version=v4.7.2.AssemblyAttributes.cpp
-  AssemblyInfo.obj : MSIL 모듈이 발견되었습니다. MSIL에 증분 링크를 사용할 수 없습니다. 전체 링크를 수행하고 있습니다.
-  blockChain.vcxproj -> C:\Users\user\Desktop\블록체인\blockChain\Debug\blockChain.exe
+﻿  blockChain.vcxproj -> C:\Users\NEW\OneDrive\바탕 화면\깃, 깃허브 공부한것들\blockChainDevelopment\blockChain\Debug\blockChain.exe
