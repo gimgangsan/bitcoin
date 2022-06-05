@@ -4,45 +4,158 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
-#include <vcclr.h>
+#include <map>
 
 namespace CppCLRWinformsProjekt {
 	namespace otherClass {
-		
+		using std::string;
+		using std::vector;
+		using std::map;
+
+		struct condition {
+			string type;
+			int target;
+
+			condition(string type, int target) {
+				this->type = type;
+				this->target = target;
+			}
+		};
+
+		class conditionChecklist {
+		public:
+			vector<condition> conditions;
+
+			conditionChecklist() {
+
+			}
+
+			virtual bool isSatisfied() {
+				return true;
+			}
+		};
+
+		class smartContract {
+		public:
+			string sender;
+			string receiver;
+			int amount;
+
+			conditionChecklist* conditions;
+
+			smartContract() {}
+			smartContract(string sender, string receiver, int amount, conditionChecklist* conditions) {
+				this->sender = sender;
+				this->receiver = receiver;
+				this->amount = amount;
+				this->conditions = conditions;
+			}
+
+			void activateContract() {
+
+			}
+		};
 
 		//¼Û°ÇÈñ°¡ ¸¸µë
 		class Block {
 
 		public:
-			std::string data;
+			string data;
 			int hash;
-			Block(std::string data, int previouesHash) {
+			smartContract contract;
+			
+			Block(string data, int previousHash) {
 				this->data = data;
-				this->hash = createOwnHash();
+				this->hash = createOwnHash(previousHash);
 			}
-			int createOwnHash() {
-				std::string datahash = int_to_string(hash) + data;
+			Block(string data, int previousHash, smartContract contract) {
+				this->data = data;
+				this->hash = createOwnHash(previousHash);
+				this->contract = contract;
+			}
+
+			int createOwnHash(int previousHash) {
+				string datahash = int_to_string(previousHash) + data;
 				int localHash = makeHash(datahash);
 				return localHash;
 			}
-			std::string int_to_string(int input) {
+			string int_to_string(int input) {
 				std::stringstream stringStraemer;
-				std::string output;
+				string output;
 				stringStraemer << input;
 				stringStraemer >> output;
 
 				return output;
 			}
 			int makeHash(std::string input) {
-				std::hash<std::string> str_hash;
+				std::hash<string> str_hash;
 				int output = str_hash(input);
 
 				return output;
 			}
 		};
 
-		Block *initialBlock = new Block("initial data", 123);
-		std::vector<Block*> blockChain = {initialBlock};
+		class userAccountManager {
+		private:
+			vector<string> users;
+			map<string, int> userWallet;
+
+		public:
+			userAccountManager() {
+				users = {};
+				userWallet = {};
+			}
+			userAccountManager(map<string, int> userWallet) {
+				for (map<string, int>::iterator it = userWallet.begin(); it != userWallet.end(); ++it) {
+					users.push_back(it->first);
+				}
+				this->userWallet = userWallet;
+			}
+			bool userExist(string targetUser) {
+				for (vector<string>::iterator it = users.begin(); it != users.end(); ++it) {
+					if (targetUser == it[0]) {
+						return true;
+					}
+				}
+				return false;
+			}
+			void appendUser(string userName, int money) {
+				userWallet[userName] = money;
+			}
+		};
+
+		class globalConditionManager {
+		private:
+			map<string, int> globalCondition;
+
+		public:
+			globalConditionManager() {
+				this->globalCondition = {};
+			}
+			bool conditionExist(string type) {
+				for (map<string, int>::iterator it = globalCondition.begin(); it != globalCondition.end(); ++it) {
+					if (it->first == type) {
+						return true;
+					}
+				}
+				return false;
+			}
+			void appendCondition(string type) {
+				globalCondition[type] = 0;
+			}
+		};
+
+		//smartContract* myContract = new smartContract("bob", "elisha", 500, myCondition);
+		
+		userAccountManager* accountManager = new userAccountManager();
+
+		globalConditionManager* conditionManager = new globalConditionManager();
+
+		Block* initialBlock = new Block("initial data", 123 );
+		vector<Block*> blockChain = { initialBlock };
+
+		
+		
 	}
 
 	
@@ -204,6 +317,8 @@ namespace CppCLRWinformsProjekt {
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
+
+			initialProjectSetting();
 		}
 		int createHash(std::string input) {
 			std::hash<std::string> str_hash;
@@ -240,7 +355,18 @@ namespace CppCLRWinformsProjekt {
 			dataInput->Clear();
 			nameInput->Clear();
 		}
+
+		void initialProjectSetting() {
+			accountManager->appendUser("bob", 500);
+			accountManager->appendUser("bob's son", 0);
+
+			conditionManager->appendCondition("a");
+			conditionManager->appendCondition("b");
+			conditionManager->appendCondition("c");
+		}
+
 		
+
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		int chainSize = blockChain.size();
