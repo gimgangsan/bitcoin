@@ -62,9 +62,28 @@ namespace CppCLRWinformsProjekt {
 			}
 		};
 
+		class transactionManager {
+		public:
+			map<string, int> userTransactions;
+
+			transactionManager() {
+				this->userTransactions = {};
+			}
+
+			void appendTransaction(string user) {
+				userTransactions[user] = 0;
+			}
+
+			void adjustTransaction(string user, int amount) {
+				userTransactions[user] = amount;
+			}
+		};
+
 		userAccountManager* accountManager = new userAccountManager();
 
 		globalConditionManager* conditionManager = new globalConditionManager();
+
+		transactionManager* transactions = new transactionManager();
 
 		struct condition {
 		public:
@@ -79,24 +98,26 @@ namespace CppCLRWinformsProjekt {
 
 		class conditionChecklist {
 		public:
-			vector<condition> conditions;
+			vector<condition*> conditions;
 
 			conditionChecklist() {
 				conditions = {};
 			}
 
 			virtual bool isSatisfied() {
-				for (vector<condition>::iterator it = conditions.begin(); it != conditions.end(); ++it)
+				for (vector<condition*>::iterator it = conditions.begin(); it != conditions.end(); ++it)
 				{
-					condition con = it[0];
-					if (conditionManager->globalCondition[con.type] != con.target) {
+					condition* con = it[0];
+					string type = con->type;
+					int target = con->target;
+					if (conditionManager->globalCondition[type] != target) {
 						return false;
 					}
 				}
 				return true;
 			}
 
-			void appendCondition(condition condition) {
+			void appendCondition(condition* condition) {
 				conditions.push_back(condition);
 			}
 		};
@@ -106,10 +127,17 @@ namespace CppCLRWinformsProjekt {
 			string sender;
 			string receiver;
 			int amount;
+			bool isNotKilled;
 
 			conditionChecklist* conditions;
 
-			smartContract() {}
+			smartContract() {
+				this->sender = "";
+				this->receiver = "";
+				this->amount = 0;
+				this->isNotKilled = true;
+				this->conditions = new conditionChecklist();
+			}
 			smartContract(string sender, string receiver, int amount, conditionChecklist* conditions) {
 				this->sender = sender;
 				this->receiver = receiver;
@@ -118,9 +146,10 @@ namespace CppCLRWinformsProjekt {
 			}
 
 			void activateContract() {
-				if (this->conditions->isSatisfied()) {
+				if (this->conditions->isSatisfied() && this->isNotKilled) {
 					accountManager->userWallet[sender] -= amount;
 					accountManager->userWallet[receiver] += amount;
+					this->isNotKilled = false;
 				}
 			}
 		};
@@ -131,13 +160,14 @@ namespace CppCLRWinformsProjekt {
 		public:
 			string data;
 			int hash;
-			smartContract contract;
+			smartContract* contract;
 			
 			Block(string data, int previousHash) {
 				this->data = data;
 				this->hash = createOwnHash(previousHash);
+				this->contract = new smartContract();
 			}
-			Block(string data, int previousHash, smartContract contract) {
+			Block(string data, int previousHash, smartContract* contract) {
 				this->data = data;
 				this->hash = createOwnHash(previousHash);
 				this->contract = contract;
@@ -172,17 +202,17 @@ namespace CppCLRWinformsProjekt {
 		
 		
 
-		void notifyAllConditionToBlock() {
+		void notifyAllSmartcontract() {
 			for (vector<Block*>::iterator it = blockChain.begin(); it != blockChain.end(); ++it) {
 				Block* blo = it[0];
-				blo->contract.activateContract();
-			
+				if (blo->contract != nullptr) {
+					blo->contract->activateContract();
+				}
 			}
 		}
 		
 	}
 
-	
 
 	
 	using namespace System;
@@ -241,6 +271,13 @@ namespace CppCLRWinformsProjekt {
 	private: System::Windows::Forms::TextBox^ bob_wallet;
 	private: System::Windows::Forms::TextBox^ bob_son_wallet;
 	private: System::Windows::Forms::Button^ button2;
+	private: System::Windows::Forms::TextBox^ sonsTransaction;
+
+
+	private: System::Windows::Forms::TextBox^ bobsTransaction;
+
+	private: System::Windows::Forms::Label^ label8;
+	private: System::Windows::Forms::Label^ label9;
 	protected:
 
 	private:
@@ -256,6 +293,8 @@ namespace CppCLRWinformsProjekt {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			initialProjectSetting();
+
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->listView1 = (gcnew System::Windows::Forms::ListView());
 			this->columnHeader1 = (gcnew System::Windows::Forms::ColumnHeader());
@@ -276,6 +315,10 @@ namespace CppCLRWinformsProjekt {
 			this->bob_wallet = (gcnew System::Windows::Forms::TextBox());
 			this->bob_son_wallet = (gcnew System::Windows::Forms::TextBox());
 			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->sonsTransaction = (gcnew System::Windows::Forms::TextBox());
+			this->bobsTransaction = (gcnew System::Windows::Forms::TextBox());
+			this->label8 = (gcnew System::Windows::Forms::Label());
+			this->label9 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// button1
@@ -451,11 +494,49 @@ namespace CppCLRWinformsProjekt {
 			this->button2->UseVisualStyleBackColor = true;
 			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click);
 			// 
+			// sonsTransaction
+			// 
+			this->sonsTransaction->Location = System::Drawing::Point(429, 405);
+			this->sonsTransaction->Name = L"sonsTransaction";
+			this->sonsTransaction->Size = System::Drawing::Size(111, 21);
+			this->sonsTransaction->TabIndex = 17;
+			this->sonsTransaction->TextChanged += gcnew System::EventHandler(this, &Form1::sonsTransaction_TextChanged);
+			// 
+			// bobsTransaction
+			// 
+			this->bobsTransaction->Location = System::Drawing::Point(114, 404);
+			this->bobsTransaction->Name = L"bobsTransaction";
+			this->bobsTransaction->Size = System::Drawing::Size(113, 21);
+			this->bobsTransaction->TabIndex = 18;
+			this->bobsTransaction->TextChanged += gcnew System::EventHandler(this, &Form1::bobsTransaction_TextChanged);
+			// 
+			// label8
+			// 
+			this->label8->AutoSize = true;
+			this->label8->Location = System::Drawing::Point(546, 408);
+			this->label8->Name = L"label8";
+			this->label8->Size = System::Drawing::Size(53, 12);
+			this->label8->TabIndex = 19;
+			this->label8->Text = L"거래수량";
+			// 
+			// label9
+			// 
+			this->label9->AutoSize = true;
+			this->label9->Location = System::Drawing::Point(55, 408);
+			this->label9->Name = L"label9";
+			this->label9->Size = System::Drawing::Size(53, 12);
+			this->label9->TabIndex = 20;
+			this->label9->Text = L"거래수량";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(7, 12);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(719, 438);
+			this->Controls->Add(this->label9);
+			this->Controls->Add(this->label8);
+			this->Controls->Add(this->bobsTransaction);
+			this->Controls->Add(this->sonsTransaction);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->bob_son_wallet);
 			this->Controls->Add(this->bob_wallet);
@@ -478,7 +559,7 @@ namespace CppCLRWinformsProjekt {
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
-			initialProjectSetting();
+
 
 		}
 		int createHash(std::string input) {
@@ -524,7 +605,34 @@ namespace CppCLRWinformsProjekt {
 			conditionManager->appendCondition("a");
 			conditionManager->appendCondition("b");
 			conditionManager->appendCondition("c");
+
+			transactions->appendTransaction("bob");
+			transactions->appendTransaction("bob's son");
 		}
+
+		smartContract* createSmartcontract() {
+			conditionChecklist* checkList = new conditionChecklist();
+			condition* condition_A = new condition("A", 1);
+			condition* condition_B = new condition("B", 2);
+			condition* condition_C = new condition("C", 3);
+			checkList->appendCondition(condition_A);
+			checkList->appendCondition(condition_B);
+			checkList->appendCondition(condition_C);
+
+			int bobTransactionQuantity = transactions->userTransactions["bob"];
+			int sonTransactionQuantity = transactions->userTransactions["bob's son"];
+			smartContract* SC;
+			if (bobTransactionQuantity > sonTransactionQuantity) {
+				int amount = bobTransactionQuantity - sonTransactionQuantity;
+				SC = new smartContract("bob", "bob's son", amount, checkList);
+			}
+			else {
+				int amount = sonTransactionQuantity - bobTransactionQuantity;
+				SC = new smartContract("bob's son", "bob", amount, checkList);
+			}
+
+			return SC;
+		};
 
 		void updateWalletInterface() {
 			string bob_money = int_to_string(accountManager->userWallet["bob"]);
@@ -532,15 +640,17 @@ namespace CppCLRWinformsProjekt {
 			string bob_son_money = int_to_string(accountManager->userWallet["bob's son"]);
 			String^ interfaceMoney = "";
 			stdString(bob_money, interfaceMoney);
-			MessageBox::Show(interfaceMoney);
 			bob_wallet->Text = interfaceMoney;
 
 			stdString(bob_son_money, interfaceMoney);
-			MessageBox::Show(interfaceMoney);
 			bob_son_wallet->Text = interfaceMoney;
 		}
 
-		
+		void getTransactionQuantity() {
+			string bobstransaction;
+			MarshalString(bobsTransaction->Text, bobstransaction);
+			int BT = stoi(bobstransaction);
+		}
 
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
@@ -548,8 +658,9 @@ namespace CppCLRWinformsProjekt {
 		int latestBlockHash = blockChain[chainSize - 1]->hash;
 		std::string data_of_block;
 		MarshalString(dataInput->Text, data_of_block);
+		
 
-		Block* newBlock = new Block(data_of_block, latestBlockHash);
+		Block* newBlock = new Block(data_of_block, latestBlockHash, createSmartcontract());
 		blockChain.push_back(newBlock);
 
 		ListViewItem^ blockInfo = gcnew ListViewItem(nameInput->Text);
@@ -571,18 +682,33 @@ private: System::Void listBox2_SelectedIndexChanged(System::Object^ sender, Syst
 	string selectedItem;
 	MarshalString(listBox2->SelectedItem->ToString(), selectedItem);
 	conditionManager->globalCondition["B"] = std::stoi(selectedItem);
+	notifyAllSmartcontract();
 }
 private: System::Void listBox1_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
 	string selectedItem;
 	MarshalString(listBox1->SelectedItem->ToString(), selectedItem);
 	conditionManager->globalCondition["A"] = std::stoi(selectedItem);
+	notifyAllSmartcontract();
 }
 private: System::Void listBox3_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
 	string selectedItem;
 	MarshalString(listBox3->SelectedItem->ToString(), selectedItem);
 	conditionManager->globalCondition["C"] = std::stoi(selectedItem);
+	notifyAllSmartcontract();
 }
 
+private: System::Void bobsTransaction_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+	string bobstransaction;
+	MarshalString(bobsTransaction->Text, bobstransaction);
+	int BT = stoi(bobstransaction);
+	transactions->adjustTransaction("bob", BT);
+}
+private: System::Void sonsTransaction_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+	string sonstransaction;
+	MarshalString(sonsTransaction->Text, sonstransaction);
+	int BT = stoi(sonstransaction);
+	transactions->adjustTransaction("bob's son", BT);
+}
 };
 
 
